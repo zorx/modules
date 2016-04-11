@@ -116,7 +116,7 @@ class Repository implements RepositoryInterface, Countable
         $modules = [];
 
         foreach ($paths as $key => $path) {
-            $manifests = $this->app['files']->glob("{$path}/module.json");
+            $manifests = $this->app['files']->glob("{$path}/" . config('modules.stubs.files.json'));
 
             is_array($manifests) || $manifests = [];
 

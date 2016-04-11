@@ -158,7 +158,7 @@ class Module extends ServiceProvider
         $lowerName = $this->getLowerName();
 
         $langPath = base_path("resources/lang/{$lowerName}");
-        
+
         if (is_dir($langPath)) {
             $this->loadTranslationsFrom($langPath, $lowerName);
         }
@@ -172,7 +172,7 @@ class Module extends ServiceProvider
     public function json($file = null)
     {
         if (is_null($file)) {
-            $file = 'module.json';
+            $file = config('modules.stubs.files.json');
         }
 
         return new Json($this->getPath() . '/' . $file, $this->app['files']);
