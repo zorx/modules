@@ -35,7 +35,7 @@ class Json
      */
     public function __construct($path, Filesystem $filesystem = null)
     {
-        $this->path = (string) $path;
+        $this->path       = (string) $path;
         $this->filesystem = $filesystem ?: new Filesystem();
         $this->attributes = Collection::make($this->getAttributes());
     }
@@ -118,7 +118,30 @@ class Json
      */
     public function getAttributes()
     {
-        return json_decode($this->getContents(), 1);
+        return $this->json_clean_decode($this->getContents(), true);
+    }
+
+    /**
+     * Clean comments of json content and decode it with json_decode().
+     * Work like the original php json_decode() function with the same params
+     *
+     * @param   string  $json    The json string being decoded
+     * @param   bool    $assoc   When TRUE, returned objects will be converted into associative arrays.
+     * @param   integer $depth   User specified recursion depth. (>=5.3)
+     * @param   integer $options Bitmask of JSON decode options. (>=5.4)
+     * @return  array/object
+     */
+    public function json_clean_decode($json, $assoc = false, $depth = 512, $options = 0)
+    {
+        // search and remove comments like /* */ and //
+        $json = preg_replace("#(/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+/)|([\s\t]//.*)|(^//.*)#", '', $json);
+        if (version_compare(phpversion(), '5.4.0', '>=')) {
+            return json_decode($json, $assoc, $depth, $options);
+        } elseif (version_compare(phpversion(), '5.3.0', '>=')) {
+            return json_decode($json, $assoc, $depth);
+        } else {
+            return json_decode($json, $assoc);
+        }
     }
 
     /**
