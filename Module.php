@@ -2,10 +2,12 @@
 
 namespace Pingpong\Modules;
 
+use File;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
+use Pingpong\Modules\Manager\ComposerManager;
 
 class Module extends ServiceProvider
 {
@@ -39,7 +41,7 @@ class Module extends ServiceProvider
      */
     public function __construct(Application $app, $name, $path)
     {
-        $this->app = $app;
+        $this->app  = $app;
         $this->name = $name;
         $this->path = realpath($path);
     }
@@ -209,6 +211,14 @@ class Module extends ServiceProvider
      */
     public function register()
     {
+        /*
+         * Register plugin class autoloaders
+         */
+        $autoloadPath = $this->path . '/vendor/autoload.php';
+        if (File::isFile($autoloadPath)) {
+            ComposerManager::instance()->autoload($this->path . '/vendor');
+        }
+
         $this->registerAliases();
 
         $this->registerProviders();
@@ -225,7 +235,7 @@ class Module extends ServiceProvider
      */
     protected function fireEvent($event)
     {
-        $this->app['events']->fire(sprintf('modules.%s.'.$event, $this->getLowerName()), [$this]);
+        $this->app['events']->fire(sprintf('modules.%s.' . $event, $this->getLowerName()), [$this]);
     }
 
     /**
@@ -255,7 +265,7 @@ class Module extends ServiceProvider
     protected function registerFiles()
     {
         foreach ($this->get('files', []) as $file) {
-            include $this->path.'/'.$file;
+            include $this->path . '/' . $file;
         }
     }
 
@@ -378,7 +388,7 @@ class Module extends ServiceProvider
      */
     public function getExtraPath($path)
     {
-        return $this->getPath().'/'.$path;
+        return $this->getPath() . '/' . $path;
     }
 
     /**
